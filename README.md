@@ -7,7 +7,7 @@ Authors:
 - Marielle Regner
 
 # Project Objectives
-- the team wants to be able to make a simple web application that allows the user, in this case a teacher, to be able to list and perform CRUD applications with Student's Data on our web application.
+- The team wants to be able to make a simple web application that allows the user, in this case a teacher, to be able to list and perform CRUD applications with Student's Data on our web application.
 
 # The Scope & Limitations
 - The user can create an account
