@@ -38,6 +38,7 @@ def logout():
    session.pop('id', None)
    session.pop('username', None)
    return redirect(url_for('login'))
+
 @app.route('/pythonlogin/register', methods=['GET', 'POST'])
 def register():
     msg = ''
@@ -63,11 +64,13 @@ def register():
     elif request.method == 'POST':
         msg = 'Please fill out the form!'
     return render_template('register.html', msg=msg)
+
 @app.route('/pythonlogin/home')
 def home():
     if 'loggedin' in session:
         return render_template('home.html', username=session['username'])
     return redirect(url_for('login'))
+
 @app.route('/pythonlogin/profile')
 def profile():
     if 'loggedin' in session:
@@ -76,5 +79,90 @@ def profile():
         account = cursor.fetchone()
         return render_template('profile.html', account=account)
     return redirect(url_for('login'))
-    
 
+@app.route('/pythonlogin/Book' , methods = ['GET','POST'])
+def Book():
+    if request.method == 'GET':
+        return render_template('Book.html')
+ 
+    if request.method == 'POST':
+
+        hobby = request.form.getlist('hobbies')
+        #hobbies = ','.join(map(str, hobby))
+        hobbies=",".join(map(str, hobby))
+
+
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        email = request.form['email']
+        password = request.form['password']
+        gender = request.form['gender']
+        hobbies = hobbies
+        country = request.form['country']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM students WHERE id = %s', (session['id'],))
+        students = cursor.fetchone()
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        password=password,
+        gender=gender, 
+        hobbies=hobbies,
+        country = country
+
+        cursor.execute('INSERT INTO students VALUES (NULL, %s, %s, %s, %s, %s, %s, %s)', (first_name, last_name, email, password, gender, hobbies, country))
+        mysql.connection.commit()
+        return redirect(url_for('datalist'))
+
+
+@app.route('/pythonlogin/datalist', methods = ['GET'])
+def datalist():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT * FROM students')
+    students = cursor.fetchall()
+    return render_template('datalist.html',students = students)
+
+@app.route('/<int:id>/delete', methods=['GET','POST'])
+def delete(id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT * FROM students')
+    students = cursor.fetchone()
+    if request.method == 'POST':
+        if students:
+            cursor.execute('DELETE FROM students WHERE id = %s', (students['id'],))
+            mysql.connection.commit()
+            return redirect(url_for('datalist'))
+    return render_template('delete.html')
+
+@app.route('/<int:id>/edit',methods = ['GET','POST'])
+def update(id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT * FROM students')
+    students = cursor.fetchone()
+    if request.method == 'POST':
+        if students:
+            cursor.execute('DELETE FROM students WHERE id = %s', (students['id'],))
+            mysql.connection.commit()
+        hobby = request.form.getlist('hobbies')
+        hobbies =  ",".join(map(str, hobby)) 
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        email = request.form['email']
+        password = request.form['password']
+        gender = request.form['gender']
+        hobbies = hobbies 
+        country = request.form['country']
+        students = cursor.fetchone()
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        password=password,
+        gender=gender, 
+        hobbies=hobbies,
+        country = country
+
+        cursor.execute('INSERT INTO students VALUES (NULL, %s, %s, %s, %s, %s, %s, %s)', (first_name, last_name, email, password, gender, hobbies, country))
+        mysql.connection.commit()
+        return redirect(url_for('datalist'))
+        return f"Student with id = {id} Does nit exist"
+    return render_template('update.html', student = students)
